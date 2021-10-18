@@ -67,4 +67,37 @@ def test_daily_min(test, expected):
     """Test min function works for zeroes, positive integers, mix of positive/negative integers."""
     from inflammation.models import daily_min
     npt.assert_array_equal(np.array(expected), daily_min(np.array(test)))
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        (
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ),
+        (
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+        ),
+        (
+            [[float('nan'), 1, 1], [1, 1, 1], [1, 1, 1]],
+            [[0, 1, 1], [1, 1, 1], [1, 1, 1]],
+        ),
+        (
+            [[1, 2, 3], [4, 5, float('nan')], [7, 8, 9]],
+            [[0.33, 0.66, 1], [0.8, 1, 0], [0.77, 0.88, 1]],
+        ),
+        (
+            [[-1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+        ),
+        (
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0.33, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+        )
+    ])
+def test_patient_normalise(test, expected):
+    """Test normalisation works for arrays of one and positive integers."""
+    from inflammation.models import patient_normalise
+    npt.assert_almost_equal(np.array(expected), patient_normalise(np.array(test)), decimal=2)
 # TODO(lesson-mocking) Implement a unit test for the load_csv function
