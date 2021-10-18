@@ -3,6 +3,7 @@
 import numpy as np
 import numpy.testing as npt
 from unittest.mock import patch
+import pytest
 
 def test_daily_mean_zeros():
     """Test that mean function works for an array of zeros."""
@@ -41,4 +42,99 @@ def test_load_csv(mock_get_data_dir):
         assert kwargs['fname'] == '/test.csv'
 
 # TODO(lesson-automatic) Implement tests for the other statistical functions
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        ([[0, 0, 0], [0, 0, 0], [0, 0, 0]], [0, 0, 0]),
+        ([[4, 2, 5], [1, 6, 2], [4, 1, 9]], [4, 6, 9]),
+        ([[4, -2, 5], [1, -6, 2], [-4, -1, 9]], [4, -1, 9]),
+    ])
+def test_daily_max(test, expected):
+    """Test max function works for zeroes, positive integers, mix of positive/negative integers."""
+    from inflammation.models import daily_max
+    npt.assert_array_equal(np.array(expected), daily_max(np.array(test)))
+
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        ([[0, 0, 0], [0, 0, 0], [0, 0, 0]], [0, 0, 0]),
+        ([[4, 2, 5], [1, 6, 2], [4, 1, 9]], [1, 1, 2]),
+        ([[4, -2, 5], [1, -6, 2], [-4, -1, 9]], [-4, -6, 2]),
+    ])
+def test_daily_min(test, expected):
+    """Test min function works for zeroes, positive integers, mix of positive/negative integers."""
+    from inflammation.models import daily_min
+    npt.assert_array_equal(np.array(expected), daily_min(np.array(test)))
+
+@pytest.mark.parametrize(
+    "test, expected, raises",
+    [
+        (
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            None,
+        ),
+        (
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+            None,
+        ),
+        (
+            [[float('nan'), 1, 1], [1, 1, 1], [1, 1, 1]],
+            [[0, 1, 1], [1, 1, 1], [1, 1, 1]],
+            None,
+        ),
+        (
+            [[1, 2, 3], [4, 5, float('nan')], [7, 8, 9]],
+            [[0.33, 0.66, 1], [0.8, 1, 0], [0.77, 0.88, 1]],
+            None,
+        ),
+        (
+            [[-1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+            None,
+        ),
+        (
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0.33, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+            None,
+        )
+        (
+            [[-1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+            ValueError,
+        ),
+        (
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0.33, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+            None,
+        ),
+        (
+            'hello',
+            None,
+            TypeError,
+        ),
+        (
+            3,
+            None,
+            TypeError,
+        ),
+        (
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            [[0.33, 0.66, 1], [0.66, 0.83, 1], [0.77, 0.88, 1]],
+            None,
+        )
+    ])
+def test_patient_normalise(test, expected, raises):
+    """Test normalisation works for arrays of one and positive integers."""
+    from inflammation.models import patient_normalise
+    if isinstance(test, list):
+        test = np.array(test)
+    if raises:
+        with pytest.raises(raises):
+            npt.assert_almost_equal(np.array(expected), patient_normalise(test), decimal=2)
+    else:
+        npt.assert_almost_equal(np.array(expected), patient_normalise(test), decimal=2)
 # TODO(lesson-mocking) Implement a unit test for the load_csv function
