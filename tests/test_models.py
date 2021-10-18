@@ -147,4 +147,8 @@ def test_load_csv(mock_get_data_dir):
        assert kwargs['fname'] == '/data_dir/test.csv'
        load_csv('/test.csv')
        name, args, kwargs = mock_loadtxt.mock_calls[1]
+<<<<<<< HEAD
        assert kwargs['fname'] == '/test.csv'
+=======
+       assert kwargs['fname'] == '/test.csv'
+>>>>>>> aeeed91a52bed9ab6aee912690f1ceaa47006ee2
